@@ -1,0 +1,34 @@
+databases:
+  - name: produccion-db
+    plan: free
+    databaseName: producciondb
+    region: ohio
+
+services:
+  - type: web
+    name: produccion-app
+    runtime: python
+    plan: starter
+    region: ohio
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: produccion-db
+          property: connectionString
+      - key: GOOGLE_DRIVE_SYNC_MODE
+        value: off
+      - key: GOOGLE_DRIVE_FILE_NAME
+        value: historial_produccion_maestro.xlsx
+      - key: APP_DATA_DIR
+        value: /tmp/produccion-data
+      - key: GOOGLE_SERVICE_ACCOUNT_FILE
+        value: /etc/secrets/google-service-account.json
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
